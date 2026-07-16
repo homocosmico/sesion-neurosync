@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tu sesión NeuroSync · Método Holístico</title>
+<meta name="description" content="Responde estas preguntas y construimos una sesión NeuroSync hecha para ti.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noche:#faf9f6;        /* fondo crema-blanco de la landing */
+    --noche-2:#ffffff;      /* superficie de campos */
+    --tinta:#0e1822;        /* tinta oscura */
+    --crema:#0e1822;        /* texto principal (alias, JS-safe) */
+    --humo:#6b7580;         /* texto secundario */
+    --azul:#2d5a8f;         /* primario navy */
+    --brasa:#b8871f;        /* acento dorado */
+    --brasa-honda:#96690f;  /* dorado hondo */
+    --linea:rgba(14,24,34,.12);
+    --radius:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--noche);
+    color:var(--tinta);
+    font-family:'DM Sans',system-ui,sans-serif;
+    font-size:17px;line-height:1.6;
+    min-height:100svh;
+    display:flex;flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ── halo ambiental navy: crece conforme avanzas ── */
+  .fuego{
+    position:fixed;inset:auto 0 0 0;height:42vh;pointer-events:none;z-index:0;
+    background:radial-gradient(120% 100% at 50% 115%, rgba(45,90,143,var(--calor,0.10)) 0%, rgba(184,135,31,calc(var(--calor,0.10)*0.30)) 40%, transparent 72%);
+    transition:opacity 1.2s ease;
+  }
+  /* ── progreso: línea dorada ── */
+  .progreso{
+    position:fixed;top:0;left:0;right:0;height:3px;z-index:10;background:rgba(14,24,34,.08);
+  }
+  .progreso b{
+    display:block;height:100%;width:0%;
+    background:linear-gradient(90deg,var(--azul),var(--brasa));
+    box-shadow:0 0 10px rgba(184,135,31,.45);
+    transition:width .5s cubic-bezier(.2,.8,.2,1);
+  }
+  header{
+    position:relative;z-index:2;
+    display:flex;justify-content:space-between;align-items:center;gap:14px;
+    padding:18px clamp(18px,5vw,48px);
+    border-bottom:1px solid var(--linea);
+  }
+  .marca{
+    display:flex;align-items:center;gap:10px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--humo);
+  }
+  .marca svg{flex:0 0 22px}
+  .marca strong{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.01em;color:var(--tinta);text-transform:none}
+  .contador{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--azul);flex:0 0 auto;
+  }
+  main{
+    position:relative;z-index:2;flex:1;
+    display:flex;align-items:center;justify-content:center;
+    padding:28px clamp(18px,5vw,48px) 96px;
+  }
+  .paso{width:min(660px,100%);animation:entra .5s ease both}
+  @keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){
+    .paso{animation:none}
+    .progreso b,.fuego{transition:none}
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--brasa);margin-bottom:18px;
+  }
+  h1,h2{
+    font-family:'Cormorant Garamond',serif;font-weight:600;
+    font-size:clamp(1.85rem,5.2vw,2.7rem);line-height:1.1;
+    letter-spacing:-.01em;margin-bottom:16px;
+  }
+  .sub{color:var(--humo);font-size:1rem;margin-bottom:30px;max-width:52ch}
+  .sub em{color:var(--azul);font-style:italic}
+  textarea,input[type=text],input[type=email],input[type=tel]{
+    width:100%;background:var(--noche-2);color:var(--tinta);
+    border:1px solid var(--linea);border-radius:var(--radius);
+    padding:16px 18px;font:inherit;resize:vertical;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  textarea{min-height:132px}
+  textarea:focus,input:focus{outline:none;border-color:var(--azul);box-shadow:0 0 0 3px rgba(45,90,143,.12)}
+  :focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+  ::placeholder{color:rgba(107,117,128,.65)}
+  .campo{margin-bottom:16px}
+  .campo label{display:block;font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--humo);margin-bottom:8px}
+  .opciones{display:grid;gap:12px}
+  .opcion{
+    display:flex;align-items:center;gap:14px;
+    background:var(--noche-2);border:1px solid var(--linea);border-radius:var(--radius);
+    padding:16px 18px;cursor:pointer;transition:border-color .15s, background .15s;
+    font-size:1.02rem;
+  }
+  .opcion:hover{border-color:rgba(45,90,143,.5)}
+  .opcion input{position:absolute;opacity:0;pointer-events:none}
+  .opcion .punto{
+    flex:0 0 18px;height:18px;border-radius:50%;
+    border:2px solid var(--humo);transition:all .15s;
+  }
+  .opcion.activa{border-color:var(--azul);background:rgba(45,90,143,.06)}
+  .opcion.activa .punto{border-color:var(--azul);background:var(--azul);box-shadow:0 0 0 3px rgba(45,90,143,.18)}
+  .acciones{display:flex;align-items:center;gap:18px;margin-top:30px;flex-wrap:wrap}
+  .btn{
+    font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--azul);
+    color:#faf9f6;border:none;border-radius:2px;
+    padding:16px 32px;cursor:pointer;
+    transition:transform .15s, box-shadow .15s, background .15s;
+  }
+  .btn:hover{background:#25497a;box-shadow:0 6px 20px rgba(45,90,143,.28)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+  .atras{
+    background:none;border:none;color:var(--humo);font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.08em;
+    cursor:pointer;padding:6px 2px;
+  }
+  .atras:hover{color:var(--azul)}
+  .pista{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--humo);letter-spacing:.06em}
+  .nota-privada{
+    font-size:.85rem;color:var(--humo);margin-top:26px;display:flex;gap:8px;align-items:flex-start;
+  }
+  .nota-privada svg{flex:0 0 14px;margin-top:4px;color:var(--brasa)}
+  .error{color:var(--brasa-honda);font-size:.88rem;margin-top:10px;display:none}
+  .error.ver{display:block}
+  footer{
+    position:relative;z-index:2;
+    padding:18px clamp(18px,5vw,48px);
+    border-top:1px solid var(--linea);
+    font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;color:var(--humo);
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  /* pantalla final */
+  .final .brasa-icono{
+    width:44px;height:44px;margin-bottom:26px;color:var(--brasa);
+    font-family:'Cormorant Garamond',serif;font-size:40px;line-height:1;
+    animation:late 3.2s ease-in-out infinite;
+  }
+  .final .brasa-icono::before{content:"\\25C6"}
+  @keyframes late{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+  @media (prefers-reduced-motion:reduce){.final .brasa-icono{animation:none}}
+  .final .caminos{display:grid;gap:12px;margin-top:28px}
+  .final .caminos a{
+    color:var(--tinta);text-decoration:none;background:var(--noche-2);border:1px solid var(--linea);
+    border-radius:var(--radius);padding:18px 20px;display:block;transition:border-color .15s;
+    font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;line-height:1.2;
+  }
+  .final .caminos a:hover{border-color:var(--azul)}
+  .final .caminos a span{display:block;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--humo);font-size:.86rem;margin-top:5px}
+  @media (max-width:560px){
+    .btn{width:100%;text-align:center}
+    .acciones{gap:14px}
+    .acciones .atras{order:2}
+  }
+</style>
+</head>
+<body>
+
+<div class="fuego" id="fuego"></div>
+<div class="progreso"><b id="barra"></b></div>
+
+<header>
+  <div class="marca"><svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,54)"><polygon points="0,-24 -12,-3 12,-3" fill="#2d5a8f"></polygon><polygon points="-14,0 -26,21 -2,21" fill="#2d5a8f"></polygon><polygon points="14,0 2,21 26,21" fill="#2d5a8f"></polygon></g></svg><strong>Método Holístico</strong>&nbsp;· NeuroSync</div>
+  <div class="contador" id="contador"></div>
+</header>
+
+<main><div id="app"></div></main>
+
+<footer>
+  <span>Tus respuestas son privadas. Se usan solo para construir tu sesión.</span>
+  <span>© Método Holístico</span>
+</footer>
+
+<script>
+/* ═══════════ CONFIG (Siddhartha) ═══════════
+   Pega aquí el webhook de GHL (inbound webhook).
+   Si queda vacío, el formulario muestra el respaldo de copiar respuestas. */
+const WEBHOOK_URL = "";           /* opcional: automatización futura */
+const WHATSAPP_NEGOCIO = "525529198943"; /* <-- PON AQUÍ el número de WhatsApp de negocio, solo dígitos con código de país */
+
+/* ═══════════ PREGUNTAS ═══════════ */
+const PASOS = [
+  { id:"intro", tipo:"intro" },
+  { id:"nicotina", tipo:"radio", eyebrow:"Para empezar",
+    q:"¿Fumas o vapeas actualmente?",
+    ops:["Fumo","Vapeo","Las dos","Ya no","Nunca lo he hecho"] },
+  { id:"mananas", tipo:"texto", eyebrow:"Tu día",
+    q:"¿A qué le dedicas tus mañanas hoy?",
+    sub:"¿Tienes algún ritual, aunque sea chiquito? Cuéntamelo como es, no como debería ser.",
+    ph:"Ej. me despierto, agarro el teléfono, café…" },
+  { id:"lugar", tipo:"texto", eyebrow:"Tu lugar",
+    q:"Cierra los ojos un segundo. ¿Cuál es tu lugar de paz?",
+    sub:"El primero que aparezca. <em>Qué se ve, qué se oye, qué se huele.</em>",
+    ph:"Ej. la playa de niño, huele a sal, se oyen las olas…" },
+  { id:"aprender", tipo:"radio", eyebrow:"Cómo funcionas",
+    q:"Cuando algo te importa aprender, ¿qué te funciona mejor?",
+    ops:["Que me digan exactamente qué hacer, paso a paso","Que me acompañen mientras encuentro mi propia forma"] },
+  { id:"entrega", tipo:"radio", eyebrow:"Cómo funcionas",
+    q:"En un masaje, una clase de yoga o algo parecido…",
+    ops:["Me entrego y dejo que me lleven","Una parte de mí se queda vigilando y analizando"] },
+  { id:"previas", tipo:"radio", eyebrow:"Cómo funcionas",
+    q:"¿Has hecho meditaciones guiadas o algo de este mundo?",
+    ops:["Sí, y me llevaron profundo","Sí, pero me incomodó que me dijeran qué hacer","Nunca. Esta sería la primera"] },
+  { id:"voz", tipo:"texto", eyebrow:"La voz",
+    q:"Si esa voz que te frena pudiera hablar cinco segundos, ¿qué te diría?",
+    sub:"Escríbela con <em>sus palabras exactas</em>, como si la estuvieras escuchando. Sin pulirla.",
+    ph:"Ej. “ya lo intentaste y no pudiste”…" },
+  { id:"verdad", tipo:"texto", eyebrow:"La verdad",
+    q:"Y si dentro de un año esa voz ya no mandara… ¿qué sabrías de ti que hoy te cuesta creer?",
+    sub:"No qué harías. Qué <em>sabrías</em>.",
+    ph:"Escríbelo en presente si te sale…" },
+  { id:"orgullo", tipo:"texto", eyebrow:"Tu evidencia",
+    q:"Cuéntame dos o tres momentos de tu vida de los que estés genuinamente orgulloso.",
+    sub:"No importa de qué área. Qué pasó, dónde estabas… y <em>dónde lo sentiste en el cuerpo</em>.",
+    ph:"Momento 1… Momento 2…" },
+  { id:"vetos", tipo:"texto", eyebrow:"Tus límites", opcional:true,
+    q:"¿Hay algo de tu historia que prefieres que no toquemos?",
+    sub:"Temas, personas, épocas. Se respeta a ciegas. Si no hay nada, sigue de largo.",
+    ph:"Opcional…" },
+  { id:"idioma", tipo:"radio", eyebrow:"Tu idioma", otro:true,
+    q:"¿Cómo hablas tú de lo que te sostiene?",
+    ops:["Dios","El universo, la energía","Yo y ya","Otro"] },
+  { id:"salida", tipo:"radio", eyebrow:"El final",
+    q:"Al terminar tu sesión, ¿cómo te quieres levantar?",
+    ops:["Con paz profunda y una sonrisa","Encendido, pero sereno","En llamas, listo para comerme el mundo"] },
+  { id:"tiempo", tipo:"radio", eyebrow:"Lo práctico",
+    q:"¿Cuánto tiempo real tienes para escucharla sin interrupciones?",
+    sub:"Sé honesto. Mejor 12 minutos enteros que 30 abandonados.",
+    ops:["12 minutos","20 minutos","30 o más"] },
+  { id:"final", tipo:"final" }
+];
+
+const R = { nombre:"", whatsapp:"", email:"" };
+let paso = 0;
+
+const app = document.getElementById("app");
+const barra = document.getElementById("barra");
+const contador = document.getElementById("contador");
+const fuego = document.getElementById("fuego");
+
+function render(){
+  const p = PASOS[paso];
+  const totalQ = PASOS.length - 2; /* sin intro ni final */
+  const idx = paso; /* posición actual */
+  /* progreso + calor */
+  const pct = Math.max(0, Math.min(100, ((paso) / (PASOS.length-1)) * 100));
+  barra.style.width = pct + "%";
+  document.documentElement.style.setProperty("--calor", (0.10 + (pct/100)*0.24).toFixed(2));
+  contador.textContent = (p.tipo==="texto"||p.tipo==="radio") ? String(idx).padStart(2,"0")+" / "+String(totalQ).padStart(2,"0") : "";
+
+  if(p.tipo==="intro"){ app.innerHTML = vistaIntro(); }
+  else if(p.tipo==="final"){ app.innerHTML = vistaFinal(); enviar(); }
+  else { app.innerHTML = vistaPregunta(p); }
+
+  wire(p);
+  window.scrollTo({top:0});
+}
+
+function vistaIntro(){
+  return `
+  <div class="paso">
+    <div class="eyebrow">Sesión a tu medida</div>
+    <h1>Voy a hacerte unas preguntas.<br>Con eso construyo una sesión NeuroSync hecha para ti.</h1>
+    <p class="sub">Respóndelas como si me las contaras a mí, sin pulirlas. Toma unos cinco minutos. Nadie más las lee.</p>
+    <div class="campo"><label for="f-nombre">Tu nombre</label><input type="text" id="f-nombre" autocomplete="given-name" placeholder="¿Cómo te llamas?"></div>
+    <div class="campo"><label for="f-wa">Tu WhatsApp</label><input type="tel" id="f-wa" autocomplete="tel" placeholder="+52 …"></div>
+    <div class="campo"><label for="f-mail">Tu correo</label><input type="email" id="f-mail" autocomplete="email" placeholder="Para mandarte tu sesión"></div>
+    <div class="error" id="err">Necesito tu nombre y al menos un contacto para mandarte la sesión.</div>
+    <div class="acciones">
+      <button class="btn" id="siguiente">Empezar</button>
+    </div>
+    <p class="nota-privada">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 118 0v3"/></svg>
+      Tus respuestas son privadas. Se usan solo para construir tu sesión. Nada de esto es consejo médico.
+    </p>
+  </div>`;
+}
+
+function vistaPregunta(p){
+  let cuerpo = "";
+  if(p.tipo==="texto"){
+    cuerpo = `<textarea id="campo" placeholder="${p.ph||""}">${R[p.id]||""}</textarea>`;
+  } else {
+    cuerpo = `<div class="opciones" role="radiogroup" aria-label="${p.q}">` + p.ops.map(o=>`
+      <label class="opcion ${R[p.id]===o?"activa":""}">
+        <input type="radio" name="op" value="${o}" ${R[p.id]===o?"checked":""}>
+        <span class="punto"></span><span>${o}</span>
+      </label>`).join("") + `</div>`
+      + (p.otro ? `<div class="campo" style="margin-top:14px"><input type="text" id="campo-otro" placeholder="Si es otro, ¿cuál?" value="${R[p.id+"_otro"]||""}"></div>` : "");
+  }
+  return `
+  <div class="paso">
+    <div class="eyebrow">${p.eyebrow||""}</div>
+    <h2>${p.q}</h2>
+    ${p.sub?`<p class="sub">${p.sub}</p>`:""}
+    ${cuerpo}
+    <div class="error" id="err">${p.tipo==="texto"?"Escríbeme aunque sea una línea.":"Elige una para seguir."}</div>
+    <div class="acciones">
+      <button class="atras" id="atras">← Atrás</button>
+      <button class="btn" id="siguiente">Siguiente</button>
+      ${p.opcional?'<span class="pista">opcional</span>':""}
+    </div>
+  </div>`;
+}
+
+function vistaFinal(){
+  const n = R.nombre ? R.nombre.split(" ")[0] : "";
+  return `
+  <div class="paso final">
+    <div class="brasa-icono" aria-hidden="true"></div>
+    <h2>Listo${n?`, ${n}`:""}. Tu fuego ya está encendido.</h2>
+    <p class="sub" id="estado-envio">Falta un solo toque: mándame tus respuestas por WhatsApp y con eso construyo tu sesión NeuroSync. Mientras llega, hay dos puertas abiertas:</p>
+    <div class="caminos">
+      <a href="#" data-camino="libro">Leer gratis el inicio de Fuego de Cenizas <span>El bestseller. Llega a tu correo en un minuto.</span></a>
+      <a href="#" data-camino="reto">Reservar mi lugar en el Reto 24 <span>60 minutos en vivo. Cupo limitado.</span></a>
+    </div>
+    <div class="acciones" id="respaldo">
+      <button class="btn" id="wa-enviar">Enviar mis respuestas por WhatsApp</button>
+      <button class="atras" id="copiar">o copiarlas</button>
+      <span class="pista">Guárdalas y mándalas por WhatsApp</span>
+    </div>
+  </div>`;
+}
+
+function wire(p){
+  const btn = document.getElementById("siguiente");
+  const atras = document.getElementById("atras");
+  if(atras) atras.onclick = ()=>{ paso=Math.max(0,paso-1); render(); };
+
+  if(p.tipo==="intro" && btn){
+    btn.onclick = ()=>{
+      R.nombre = val("f-nombre"); R.whatsapp = val("f-wa"); R.email = val("f-mail");
+      if(!R.nombre || (!R.whatsapp && !R.email)){ err(true); return; }
+      err(false); paso++; render();
+    };
+  }
+  if(p.tipo==="texto" && btn){
+    const campo = document.getElementById("campo");
+    campo.focus();
+    btn.onclick = ()=>{
+      const v = campo.value.trim();
+      if(!v && !p.opcional){ err(true); return; }
+      R[p.id]=v; err(false); paso++; render();
+    };
+  }
+  if(p.tipo==="radio" && btn){
+    document.querySelectorAll(".opcion").forEach(el=>{
+      el.addEventListener("click",()=>{
+        document.querySelectorAll(".opcion").forEach(x=>x.classList.remove("activa"));
+        el.classList.add("activa");
+        R[p.id]=el.querySelector("input").value; err(false);
+      });
+    });
+    btn.onclick = ()=>{
+      if(!R[p.id]){ err(true); return; }
+      if(p.otro){ const o=document.getElementById("campo-otro"); if(o) R[p.id+"_otro"]=o.value.trim(); }
+      paso++; render();
+    };
+  }
+  if(p.tipo==="final"){
+    const wa = document.getElementById("wa-enviar");
+    if(wa) wa.onclick = enviarWhatsApp;
+    const cop = document.getElementById("copiar");
+    if(cop) cop.onclick = ()=>{
+      navigator.clipboard.writeText(resumen()).then(()=>{ cop.textContent="Copiado ✓"; });
+    };
+  }
+}
+
+function val(id){ const e=document.getElementById(id); return e?e.value.trim():""; }
+function err(v){ const e=document.getElementById("err"); if(e) e.classList.toggle("ver",v); }
+
+function resumen(){
+  return Object.entries(R).filter(([k,v])=>v).map(([k,v])=>k.toUpperCase()+": "+v).join("\n");
+}
+
+function enviarWhatsApp(){
+  const txt = "Hola, soy " + (R.nombre||"") + ". Terminé las preguntas para mi sesión NeuroSync:\n\n" + resumen();
+  window.open("https://wa.me/" + WHATSAPP_NEGOCIO + "?text=" + encodeURIComponent(txt), "_blank");
+}
+
+async function enviar(){
+  const estado = document.getElementById("estado-envio");
+  const respaldo = document.getElementById("respaldo");
+  if(!WEBHOOK_URL){ return; } /* sin webhook: el envío es por WhatsApp, botón siempre visible */
+  try{
+    const r = await fetch(WEBHOOK_URL,{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ origen:"rapport-neurosync", fecha:new Date().toISOString(), respuestas:R })
+    });
+    if(!r.ok) throw new Error();
+  }catch(e){
+    if(estado) estado.innerHTML = "No pude enviar tus respuestas por un problema de conexión. Cópialas con el botón y mándalas por WhatsApp; con eso construimos tu sesión igual.";
+    if(respaldo) respaldo.style.display="flex";
+  }
+}
+
+render();
+</script>
+</body>
+</html>
