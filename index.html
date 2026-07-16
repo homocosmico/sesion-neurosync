@@ -23,6 +23,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
+  html,body{overflow-x:hidden}
   body{
     background:var(--noche);
     color:var(--tinta);
@@ -70,7 +71,7 @@
     padding:28px clamp(18px,5vw,48px) 96px;
   }
   .paso{width:min(660px,100%);animation:entra .5s ease both}
-  @keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes entra{from{opacity:0}to{opacity:1}}
   @media (prefers-reduced-motion:reduce){
     .paso{animation:none}
     .progreso b,.fuego{transition:none}
@@ -148,7 +149,7 @@
     font-family:'Cormorant Garamond',serif;font-size:40px;line-height:1;
     animation:late 3.2s ease-in-out infinite;
   }
-  .final .brasa-icono::before{content:"\\25C6"}
+  .final .brasa-icono::before{content:"\25C6"}
   @keyframes late{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
   @media (prefers-reduced-motion:reduce){.final .brasa-icono{animation:none}}
   .final .caminos{display:grid;gap:12px;margin-top:28px}
@@ -186,9 +187,8 @@
 <script>
 /* ═══════════ CONFIG (Siddhartha) ═══════════
    Pega aquí el webhook de GHL (inbound webhook).
-   Si queda vacío, el formulario muestra el respaldo de copiar respuestas. */
-const WEBHOOK_URL = "https://services.leadconnectorhq.com/hooks/3NadJt21CAuDA7Oqm9GC/webhook-trigger/61996e78-c097-449f-8141-812d91cd3538";           /* opcional: automatización futura */
-const WHATSAPP_NEGOCIO = "525529198943"; /* <-- PON AQUÍ el número de WhatsApp de negocio, solo dígitos con código de país */
+   Si queda vacío, no se envía nada (estado de pre-configuración). */
+const WEBHOOK_URL = "https://services.leadconnectorhq.com/hooks/3NadJt21CAuDA7Oqm9GC/webhook-trigger/61996e78-c097-449f-8141-812d91cd3538"; /* <-- Siddhartha: pega aquí la URL del Inbound Webhook de GHL. Con eso, cada respuesta llega sola al CRM. */
 
 /* ═══════════ PREGUNTAS ═══════════ */
 const PASOS = [
@@ -216,7 +216,7 @@ const PASOS = [
   { id:"voz", tipo:"texto", eyebrow:"La voz",
     q:"Si esa voz que te frena pudiera hablar cinco segundos, ¿qué te diría?",
     sub:"Escríbela con <em>sus palabras exactas</em>, como si la estuvieras escuchando. Sin pulirla.",
-    ph:"Ej. “ya lo intentaste y no pudiste”…" },
+    ph:"Ej. \u201Cya lo intentaste y no pudiste\u201D…" },
   { id:"verdad", tipo:"texto", eyebrow:"La verdad",
     q:"Y si dentro de un año esa voz ya no mandara… ¿qué sabrías de ti que hoy te cuesta creer?",
     sub:"No qué harías. Qué <em>sabrías</em>.",
@@ -321,15 +321,13 @@ function vistaFinal(){
   <div class="paso final">
     <div class="brasa-icono" aria-hidden="true"></div>
     <h2>Listo${n?`, ${n}`:""}. Tu fuego ya está encendido.</h2>
-    <p class="sub" id="estado-envio">Falta un solo toque: mándame tus respuestas por WhatsApp y con eso construyo tu sesión NeuroSync. Mientras llega, hay dos puertas abiertas:</p>
+    <p class="sub" id="estado-envio">Con esto construyo tu sesión NeuroSync y te la mando a tu correo. Mientras llega, hay dos puertas abiertas:</p>
     <div class="caminos">
-      <a href="#" data-camino="libro">Leer gratis el inicio de Fuego de Cenizas <span>El bestseller. Llega a tu correo en un minuto.</span></a>
-      <a href="#" data-camino="reto">Reservar mi lugar en el Reto 24 <span>60 minutos en vivo. Cupo limitado.</span></a>
+      <a href="https://carlosalberto.mx/libro-fuego" data-camino="libro">Leer gratis el inicio de Fuego de Cenizas <span>El bestseller. Llega a tu correo en un minuto.</span></a>
+      <a href="https://carlosalberto.mx/reto24lista" data-camino="reto">Reservar mi lugar en el Reto 24 <span>60 minutos en vivo. Cupo limitado.</span></a>
     </div>
-    <div class="acciones" id="respaldo">
-      <button class="btn" id="wa-enviar">Enviar mis respuestas por WhatsApp</button>
-      <button class="atras" id="copiar">o copiarlas</button>
-      <span class="pista">Guárdalas y mándalas por WhatsApp</span>
+    <div class="acciones" id="reintento" style="display:none">
+      <button class="btn" id="btn-reintentar">Reintentar envío</button>
     </div>
   </div>`;
 }
@@ -370,11 +368,12 @@ function wire(p){
     };
   }
   if(p.tipo==="final"){
-    const wa = document.getElementById("wa-enviar");
-    if(wa) wa.onclick = enviarWhatsApp;
-    const cop = document.getElementById("copiar");
-    if(cop) cop.onclick = ()=>{
-      navigator.clipboard.writeText(resumen()).then(()=>{ cop.textContent="Copiado ✓"; });
+    const rei = document.getElementById("btn-reintentar");
+    if(rei) rei.onclick = ()=>{
+      document.getElementById("reintento").style.display="none";
+      const est = document.getElementById("estado-envio");
+      if(est) est.textContent = "Enviando…";
+      enviar(true);
     };
   }
 }
@@ -382,28 +381,24 @@ function wire(p){
 function val(id){ const e=document.getElementById(id); return e?e.value.trim():""; }
 function err(v){ const e=document.getElementById("err"); if(e) e.classList.toggle("ver",v); }
 
-function resumen(){
-  return Object.entries(R).filter(([k,v])=>v).map(([k,v])=>k.toUpperCase()+": "+v).join("\n");
-}
 
-function enviarWhatsApp(){
-  const txt = "Hola, soy " + (R.nombre||"") + ". Terminé las preguntas para mi sesión NeuroSync:\n\n" + resumen();
-  window.open("https://wa.me/" + WHATSAPP_NEGOCIO + "?text=" + encodeURIComponent(txt), "_blank");
-}
-
-async function enviar(){
+async function enviar(confirmar){
   const estado = document.getElementById("estado-envio");
-  const respaldo = document.getElementById("respaldo");
-  if(!WEBHOOK_URL){ return; } /* sin webhook: el envío es por WhatsApp, botón siempre visible */
+  const reintento = document.getElementById("reintento");
+  if(!WEBHOOK_URL){ return; }
+  const payload = JSON.stringify({ origen:"rapport-neurosync", fecha:new Date().toISOString(), respuestas:R });
   try{
-    const r = await fetch(WEBHOOK_URL,{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ origen:"rapport-neurosync", fecha:new Date().toISOString(), respuestas:R })
-    });
-    if(!r.ok) throw new Error();
-  }catch(e){
-    if(estado) estado.innerHTML = "No pude enviar tus respuestas por un problema de conexión. Cópialas con el botón y mándalas por WhatsApp; con eso construimos tu sesión igual.";
-    if(respaldo) respaldo.style.display="flex";
+    const r = await fetch(WEBHOOK_URL,{ method:"POST", headers:{"Content-Type":"application/json"}, body: payload });
+    if(!r.ok) throw new Error("status");
+    if(confirmar && estado) estado.textContent = "Listo. Tus respuestas ya llegaron. Tu sesión va en camino a tu correo.";
+  }catch(e1){
+   try{
+    await fetch(WEBHOOK_URL,{ method:"POST", mode:"no-cors", body: payload });
+    if(confirmar && estado) estado.textContent = "Listo. Tus respuestas ya llegaron. Tu sesión va en camino a tu correo.";
+   }catch(e2){
+    if(estado) estado.textContent = "No pude registrar tus respuestas por un problema de conexión. Revisa tu internet y vuelve a intentar.";
+    if(reintento) reintento.style.display="flex";
+   }
   }
 }
 
